@@ -1,4 +1,4 @@
-# Ubuntu 14.04 based container with CUDA 7 and cuDNN 4
+# Ubuntu 14.04 based container with CUDA 7 and cuDNN 3
 # Prepared to run with https://github.com/sohiniu/caffe/tree/patch-2
 # see https://hub.docker.com/r/nvidia/cuda/ for more up to date dockers
 
@@ -6,7 +6,7 @@
 # http://www.nvidia.com/object/linux-amd64-display-archive.html
 
 BootStrap: docker
-From: nvidia/cuda:7.0-cudnn4-devel-ubuntu14.04
+From: nvidia/cuda:7.0-cudnn3-devel-ubuntu14.04
 
 %help
 You're on your own.
@@ -17,7 +17,7 @@ NVIDIA-Linux-x86_64-375.26.run /opt/
 %labels
 Maintainer tomasz.golan@gmail.com
 CUDA 7
-cuDNN 4
+cuDNN 3
 OS Ubuntu14.04
 NVIDIA-DRIVER 375.26
 
@@ -36,9 +36,9 @@ NVIDIA-DRIVER 375.26
 
     apt update && apt install -y --no-install-recommends \
         build-essential \
+        ca-certificates \
         cmake \
         git \
-        wget \
         libatlas-base-dev \
         libboost-all-dev \
         libgflags-dev \
@@ -49,18 +49,10 @@ NVIDIA-DRIVER 375.26
         libopencv-dev \
         libprotobuf-dev \
         libsnappy-dev \
-        protobuf-compiler \
-        python-dev \
-        python-numpy \
-        python-pip \
-        python-setuptools \
-        python-scipy
+        protobuf-compiler
 
     # clean after apt
     rm -rf /var/lib/apt/lists/*
-
-    # upgrade pip
-    pip install --upgrade pip
     
     ##### INSTALL NVIDIA DRIVERS #####
     
@@ -82,11 +74,10 @@ NVIDIA-DRIVER 375.26
 
     # get Caffe source code (with Sohini's patch v2)
     cd /opt/
+    # to avoid "Problem with the SSL CA cert (path? access rights?)"
+    update-ca-certificates
     git clone -b patch-2 --depth 1 https://github.com/sohiniu/caffe.git
     cd caffe
-
-    # install Python requirements
-    for req in $(cat python/requirements.txt) pydot; do pip install $req; done
 
     # make Caffe
     # NOTE: in the future we may want -DUSE_NCCL=1
